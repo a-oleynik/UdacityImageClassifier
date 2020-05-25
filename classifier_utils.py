@@ -18,7 +18,7 @@ BATCH_SIZE = 64
 LEARNING_RATE = 0.001
 DROPOUT = 0.3
 HIDDEN_LAYER = 512
-EPOCHS = 10
+EPOCHS = 6
 use_gpu = torch.cuda.is_available()
 pre_models = {"vgg16": 25088,
               "densenet121": 1024,
@@ -216,7 +216,7 @@ def process_image(image):
     return img_tensor
 
 
-def predict(image_path, model, idx_to_class, topk=5, use_gpu=True):
+def predict(image_path, model, topk=5, use_gpu=True):
     if use_gpu:
         model = model.cuda()
     model.eval()
@@ -228,9 +228,10 @@ def predict(image_path, model, idx_to_class, topk=5, use_gpu=True):
         output = model.forward(img_tensor.cuda())
 
     probability = F.softmax(output.data, dim=1)
+    return probability.topk(topk)
 
-    top_idx = np.argsort(probability)[-topk:][::-1]
-    top_class = [idx_to_class[x] for x in top_idx]
-    top_probability = probability[top_idx]
 
-    return top_class, top_probability
+def extract_classes(cat_to_name, probabilities_tensor):
+    classes = [cat_to_name[str(index + 1)] for index in np.array(probabilities_tensor[1][0])]
+    probabilities = np.array(probabilities_tensor[0][0]).tolist()
+    return classes, probabilities

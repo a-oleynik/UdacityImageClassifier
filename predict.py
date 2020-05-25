@@ -1,7 +1,7 @@
 import torch
 import argparse
 import json
-from classifier_utils import load_checkpoint, process_image, predict
+from classifier_utils import load_checkpoint, process_image, predict, extract_classes
 
 use_gpu = torch.cuda.is_available
 
@@ -26,13 +26,11 @@ def main():
     img = process_image(img)
     print(img.shape)
 
-    idx_to_class = {v: k for k, v in loaded_model.class_to_idx.items()}
-    top_class, top_probability = predict(img, loaded_model, idx_to_class, topk=args.topk, use_gpu=args.gpu)
+    probabilities_tensor = predict(args.image_path, loaded_model, topk=args.topk, use_gpu=args.gpu)
+    classes, probabilities = extract_classes(cat_to_name, probabilities_tensor)
 
-    # print('Predicted Classes: ', top_class)
-    print('Predicted Class Names: ')
-    [print(cat_to_name[x]) for x in top_class]
-    print('Predicted Probabilities: ', top_probability)
+    print('Predicted Class Names: ', classes)
+    print('Predicted Probabilities: ', probabilities)
 
 
 if __name__ == "__main__":
