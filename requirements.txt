@@ -1,0 +1,12 @@
+argparse
+torch
+torchvision
+numpy
+PIL
+collections
+os
+jupyter
+matplotlib
+pandas
+argparse
+json
