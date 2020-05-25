@@ -161,8 +161,10 @@ def train_process(args):
     optimizer = optim.Adam(model.classifier.parameters(), args.learning_rate)
 
     training(model, criterion, optimizer, dataloaders['training'], dataloaders['validation'], args.epochs)
-    # validation_criterion = nn.NLLLoss()
-    # validating(model, validation_criterion, dataloaders['validation'])
+    validation_criterion = nn.NLLLoss()
+    print('Accuracy of the model against the testing data:')
+    loss, accuracy = validating(model, validation_criterion, dataloaders['testing'])
+    print("Testing Loss: {:.3f} ".format(loss), "testing Accuracy: {:.3f}".format(accuracy))
 
     model.class_to_idx = image_datasets['training'].class_to_idx
     checkpoint = {'epochs': args.epochs,
@@ -229,8 +231,8 @@ def predict(image_path, model, topk=5, use_gpu=True):
 
     probability = F.softmax(output.data, dim=1)
     return probability.topk(topk)
-
-
+    
+    
 def extract_classes(cat_to_name, probabilities_tensor):
     classes = [cat_to_name[str(index + 1)] for index in np.array(probabilities_tensor[1][0])]
     probabilities = np.array(probabilities_tensor[0][0]).tolist()
